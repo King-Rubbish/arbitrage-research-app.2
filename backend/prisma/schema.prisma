@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  email      String     @unique
+  password   String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  watchlist  Watchlist[]
+  searches   Search[]
+}
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  sourceUrl   String?     // e.g., Marketplace/Alibaba/Aliexpress link
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  priceData   PriceData[]
+  watchlists  Watchlist[]
+}
+
+model PriceData {
+  id          Int       @id @default(autoincrement())
+  productId   Int
+  platform    String    // eBay, Amazon, Mercari, etc.
+  price       Float
+  retrievedAt DateTime  @default(now())
+
+  product     Product   @relation(fields: [productId], references: [id])
+}
+
+model Watchlist {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  addedAt   DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Search {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  query     String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
